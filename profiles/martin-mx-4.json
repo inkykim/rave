@@ -1,0 +1,100 @@
+{
+  "schema": "rave.profile/v1",
+  "manufacturer": "Martin",
+  "model": "MX-4",
+  "modes": {
+    "7-channel": {
+      "channels": [
+        {
+          "name": "Shutter/Lamp/Reset",
+          "type": "ShutterStrobe",
+          "capabilities": [
+            { "dmxRange": [0, 9], "label": "Blackout" },
+            { "dmxRange": [10, 19], "label": "Lamp on", "effect": "lamp_on" },
+            { "dmxRange": [20, 99], "label": "Open" },
+            { "dmxRange": [100, 159], "label": "Strobe fast->slow", "effect": "strobe" },
+            { "dmxRange": [160, 179], "label": "Shutter closed" },
+            { "dmxRange": [180, 204], "label": "Standalone music trigger" },
+            { "dmxRange": [205, 229], "label": "Standalone auto trigger" },
+            { "dmxRange": [230, 239], "label": "Shutter closed" },
+            { "dmxRange": [240, 249], "label": "Reset", "effect": "reset" },
+            { "dmxRange": [250, 255], "label": "Lamp off", "effect": "lamp_off" }
+          ]
+        },
+        {
+          "name": "Color Wheel",
+          "type": "ColorWheel",
+          "capabilities": [
+            { "dmxRange": [0, 5], "label": "White", "colorHex": "#ffffff" },
+            { "dmxRange": [12, 17], "label": "Light blue 101", "colorHex": "#a3d4ff" },
+            { "dmxRange": [24, 29], "label": "Fern green 205", "colorHex": "#3f8e3f" },
+            { "dmxRange": [36, 41], "label": "Red 304", "colorHex": "#ff2a2a" },
+            { "dmxRange": [48, 53], "label": "Yellow 603", "colorHex": "#ffe600" },
+            { "dmxRange": [60, 65], "label": "Magenta 507", "colorHex": "#d8009f" },
+            { "dmxRange": [72, 77], "label": "Medium blue 108", "colorHex": "#3060ff" },
+            { "dmxRange": [84, 89], "label": "Deep orange 302", "colorHex": "#ff6a00" },
+            { "dmxRange": [96, 101], "label": "Light green 204", "colorHex": "#9ee36b" },
+            { "dmxRange": [108, 113], "label": "Cyan 104", "colorHex": "#00d4d4" },
+            { "dmxRange": [120, 125], "label": "Pink 312", "colorHex": "#ff7ab5" },
+            { "dmxRange": [132, 137], "label": "Blue 111", "colorHex": "#0030c0" },
+            { "dmxRange": [144, 149], "label": "Amber 604", "colorHex": "#ffbf00" },
+            { "dmxRange": [156, 161], "label": "Primary red 308", "colorHex": "#ff0000" },
+            { "dmxRange": [168, 173], "label": "Primary green 206", "colorHex": "#00c800" },
+            { "dmxRange": [180, 185], "label": "Orange 306", "colorHex": "#ff8800" },
+            { "dmxRange": [192, 197], "label": "Split-color 1", "colorHex": "#c878c8" },
+            { "dmxRange": [204, 209], "label": "Split-color 2", "colorHex": "#78c8c8" }
+          ]
+        },
+        {
+          "name": "Gobo Wheel",
+          "type": "Gobo",
+          "capabilities": [
+            { "dmxRange": [0, 11], "label": "Open", "gobo": "open" },
+            { "dmxRange": [12, 23], "label": "Worms 2", "gobo": "worms_2" },
+            { "dmxRange": [24, 35], "label": "Web", "gobo": "web" },
+            { "dmxRange": [36, 47], "label": "Petals", "gobo": "petals" },
+            { "dmxRange": [48, 59], "label": "Spokes", "gobo": "spokes" },
+            { "dmxRange": [60, 71], "label": "Cone 2", "gobo": "cone_2" },
+            { "dmxRange": [72, 83], "label": "Maze", "gobo": "maze" },
+            { "dmxRange": [84, 95], "label": "Crater", "gobo": "crater" },
+            { "dmxRange": [96, 107], "label": "Holes 2", "gobo": "holes_2" },
+            { "dmxRange": [108, 119], "label": "Cross 2", "gobo": "cross_2" },
+            { "dmxRange": [120, 131], "label": "Jagged cross", "gobo": "jagged_cross" },
+            { "dmxRange": [132, 143], "label": "Atomic", "gobo": "atomic" },
+            { "dmxRange": [144, 155], "label": "Dot circle", "gobo": "dot_circle" },
+            { "dmxRange": [156, 167], "label": "Nordic", "gobo": "nordic" },
+            { "dmxRange": [168, 179], "label": "Aim", "gobo": "aim" },
+            { "dmxRange": [180, 191], "label": "Spokes 2", "gobo": "spokes_2" },
+            { "dmxRange": [192, 203], "label": "Tie", "gobo": "tie" },
+            { "dmxRange": [204, 215], "label": "Nova", "gobo": "nova" },
+            { "dmxRange": [216, 227], "label": "Triple beam", "gobo": "triple_beam" },
+            { "dmxRange": [228, 239], "label": "Dot 2", "gobo": "dot_2" }
+          ]
+        },
+        {
+          "name": "Pan",
+          "type": "Pan",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Pan 0->230 deg (127 = neutral)" }]
+        },
+        {
+          "name": "Tilt",
+          "type": "Tilt",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Tilt 0->76 deg (127 = neutral)" }]
+        },
+        {
+          "name": "Pan/Tilt Speed",
+          "type": "Speed",
+          "capabilities": [
+            { "dmxRange": [0, 2], "label": "Tracking (smoothing off)" },
+            { "dmxRange": [3, 255], "label": "Fast->Slow" }
+          ]
+        },
+        {
+          "name": "Color/Gobo Speed",
+          "type": "Speed",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Fast->Slow" }]
+        }
+      ]
+    }
+  }
+}

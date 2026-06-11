@@ -1,0 +1,34 @@
+{
+  "schema": "rave.rig/v1",
+  "universe": 1,
+  "fixtures": [
+    {
+      "id": "mx4-1",
+      "profile": "martin-mx-4",
+      "mode": "7-channel",
+      "start": 1,
+      "position": { "x": -2, "y": 0 }
+    },
+    {
+      "id": "mx4-2",
+      "profile": "martin-mx-4",
+      "mode": "7-channel",
+      "start": 11,
+      "position": { "x": 2, "y": 0 }
+    },
+    {
+      "id": "legend-1",
+      "profile": "chauvet-legend-5000x",
+      "mode": "15-channel",
+      "start": 21,
+      "position": { "x": -3, "y": -3 }
+    },
+    {
+      "id": "legend-2",
+      "profile": "chauvet-legend-5000x",
+      "mode": "15-channel",
+      "start": 41,
+      "position": { "x": 3, "y": -3 }
+    }
+  ]
+}

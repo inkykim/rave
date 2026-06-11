@@ -1,0 +1,128 @@
+{
+  "schema": "rave.profile/v1",
+  "manufacturer": "Chauvet",
+  "model": "Legend 5000X",
+  "modes": {
+    "15-channel": {
+      "channels": [
+        {
+          "name": "Dimmer",
+          "type": "Dimmer",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Closed -> Open (0-100%)" }]
+        },
+        {
+          "name": "Shutter/Strobe",
+          "type": "ShutterStrobe",
+          "capabilities": [
+            { "dmxRange": [0, 1], "label": "Blackout" },
+            { "dmxRange": [2, 7], "label": "Open" },
+            { "dmxRange": [8, 63], "label": "Strobe slow->fast", "effect": "strobe" },
+            { "dmxRange": [64, 71], "label": "Open" },
+            { "dmxRange": [72, 127], "label": "Pulse strobe dark->bright", "effect": "pulse_strobe_db" },
+            { "dmxRange": [128, 135], "label": "Open" },
+            { "dmxRange": [136, 191], "label": "Pulse strobe bright->dark", "effect": "pulse_strobe_bd" },
+            { "dmxRange": [192, 199], "label": "Open" },
+            { "dmxRange": [200, 253], "label": "Random strobe slow->fast", "effect": "random_strobe" },
+            { "dmxRange": [254, 255], "label": "Open" }
+          ]
+        },
+        {
+          "name": "Color Wheel",
+          "type": "ColorWheel",
+          "capabilities": [
+            { "dmxRange": [0, 17], "label": "White", "colorHex": "#ffffff" },
+            { "dmxRange": [18, 35], "label": "Red", "colorHex": "#ff0000" },
+            { "dmxRange": [36, 51], "label": "Blue", "colorHex": "#0000ff" },
+            { "dmxRange": [52, 71], "label": "Green", "colorHex": "#00ff00" },
+            { "dmxRange": [72, 89], "label": "Purple", "colorHex": "#800080" },
+            { "dmxRange": [90, 107], "label": "5000K", "colorHex": "#f0f8ff" },
+            { "dmxRange": [108, 127], "label": "3200K", "colorHex": "#ffd1a0" },
+            { "dmxRange": [128, 187], "label": "Rainbow CW", "effect": "rainbow_cw" },
+            { "dmxRange": [188, 195], "label": "Stop" },
+            { "dmxRange": [196, 255], "label": "Rainbow CCW", "effect": "rainbow_ccw" }
+          ]
+        },
+        {
+          "name": "Cyan",
+          "type": "ColorCMY",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Cyan 0-100%" }]
+        },
+        {
+          "name": "Magenta",
+          "type": "ColorCMY",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Magenta 0-100%" }]
+        },
+        {
+          "name": "Yellow",
+          "type": "ColorCMY",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Yellow 0-100%" }]
+        },
+        {
+          "name": "Color Macro",
+          "type": "ColorMacro",
+          "capabilities": [
+            { "dmxRange": [0, 7], "label": "None" },
+            { "dmxRange": [8, 255], "label": "Macros 1-31 (8-unit blocks)" }
+          ]
+        },
+        {
+          "name": "Beam",
+          "type": "Beam",
+          "capabilities": [
+            { "dmxRange": [0, 63], "label": "Full beam" },
+            { "dmxRange": [64, 127], "label": "Frost filter" },
+            { "dmxRange": [128, 143], "label": "Flat/wide beam 0 deg" },
+            { "dmxRange": [144, 255], "label": "Flat/wide beam 90 deg" }
+          ]
+        },
+        {
+          "name": "Zoom",
+          "type": "Zoom",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "10 -> 30 deg" }]
+        },
+        {
+          "name": "Pan",
+          "type": "Pan",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Pan 0->570 deg (128 = center)" }]
+        },
+        {
+          "name": "Tilt",
+          "type": "Tilt",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Tilt 0->270 deg (128 = center)" }]
+        },
+        {
+          "name": "Pan Fine",
+          "type": "PanFine",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Pan LSB" }]
+        },
+        {
+          "name": "Tilt Fine",
+          "type": "TiltFine",
+          "capabilities": [{ "dmxRange": [0, 255], "label": "Tilt LSB" }]
+        },
+        {
+          "name": "Control",
+          "type": "Control",
+          "capabilities": [
+            { "dmxRange": [0, 7], "label": "Smooth pan/tilt (ramp on)" },
+            { "dmxRange": [8, 63], "label": "Fast pan/tilt (ramp off)" },
+            { "dmxRange": [64, 127], "label": "Color calibration mode" },
+            { "dmxRange": [128, 191], "label": "Save calibration (hold 3s)" },
+            { "dmxRange": [192, 255], "label": "Reset all motors (hold 3s)", "effect": "reset" }
+          ]
+        },
+        {
+          "name": "Lamp",
+          "type": "Lamp",
+          "capabilities": [
+            { "dmxRange": [0, 47], "label": "Standby" },
+            { "dmxRange": [48, 95], "label": "Lamp on (hold 3s)", "effect": "lamp_on" },
+            { "dmxRange": [96, 159], "label": "Standby" },
+            { "dmxRange": [160, 207], "label": "Lamp off (hold 3s)", "effect": "lamp_off" },
+            { "dmxRange": [208, 255], "label": "Standby" }
+          ]
+        }
+      ]
+    }
+  }
+}
