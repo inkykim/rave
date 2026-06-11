@@ -1,0 +1,16 @@
+{
+  "name": "rave",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "typecheck": "bun --filter '*' run typecheck",
+    "test": "bun --filter '*' run test",
+    "daemon": "bun --filter daemon dev",
+    "web": "bun --filter web dev",
+    "dev": "bun --filter '*' dev"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  }
+}

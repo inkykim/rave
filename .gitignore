@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+.DS_Store
+*.log
+audit.log
+presets.json
+presets.json.tmp
+.env
+.env.local
+.vite/
+.svelte-kit/
+.turbo/
