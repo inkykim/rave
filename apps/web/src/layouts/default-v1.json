@@ -1,0 +1,16 @@
+{
+  "schema": "rave.layout/v1",
+  "pages": [
+    {
+      "name": "main",
+      "grid": { "rows": 5, "cols": 8 },
+      "pads": [
+        { "row": 0, "col": 0, "label": "Strike all", "pressIntent": { "verb": "strike_all" } },
+        { "row": 0, "col": 1, "label": "Blackout", "pressIntent": { "verb": "blackout" } },
+        { "row": 0, "col": 2, "label": "Home", "pressIntent": { "verb": "home_all" } },
+        { "row": 0, "col": 3, "label": "Reset (mx4-1)", "pressIntent": { "verb": "reset", "fixture": "mx4-1" } },
+        { "row": 0, "col": 4, "label": "Panic", "pressIntent": { "verb": "panic" } }
+      ]
+    }
+  ]
+}

@@ -5,27 +5,39 @@ import { UniverseBuffer } from "./buffer"
 import { TickLoop } from "./tick"
 import { IdentityTransform } from "./buffer-transform"
 import { NullSink } from "./sinks/null-sink"
+import { PresetController } from "./preset-controller"
+import { AuditLog } from "./audit-log"
+import { startWsServer } from "./ws-server"
 
 const ROOT = resolve(import.meta.dir, "../../..")
 const PROFILES_DIR = resolve(ROOT, "profiles")
 const RIG_PATH = resolve(ROOT, "config/rig.example.json")
+const PRESETS_PATH = resolve(ROOT, "presets.json")
+const LAYOUT_PATH = resolve(ROOT, "apps/web/src/layouts/default-v1.json")
+const AUDIT_PATH = resolve(ROOT, "audit.log")
+
+const ALLOW_DESTRUCTIVE = process.env.RAVE_ALLOW_DESTRUCTIVE === "true"
 
 async function main(): Promise<void> {
   console.log(`[rave] starting…`)
-  console.log(`[rave]   profiles: ${PROFILES_DIR}`)
-  console.log(`[rave]   rig:      ${RIG_PATH}`)
 
   const profiles = await loadProfiles(PROFILES_DIR)
-  console.log(`[rave]   loaded ${Object.keys(profiles).length} profiles: ${Object.keys(profiles).join(", ")}`)
+  console.log(`[rave]   profiles: ${Object.keys(profiles).join(", ")}`)
 
   const rig = await loadRig(RIG_PATH, profiles)
-  console.log(`[rave]   loaded rig with ${rig.fixtures.length} fixtures on universe ${rig.config.universe}`)
+  console.log(`[rave]   rig: ${rig.fixtures.length} fixtures on universe ${rig.config.universe}`)
   for (const f of rig.fixtures) {
     console.log(`[rave]     - ${f.id}: ${f.profile}/${f.mode} @ ${f.start}..${f.start + f.width - 1}`)
   }
 
   const universes = Array.from(new Set(rig.fixtures.map((f) => f.universe ?? rig.config.universe)))
   const buffer = new UniverseBuffer(universes)
+
+  const presets = new PresetController(PRESETS_PATH, buffer, rig.config.universe)
+  await presets.load()
+  console.log(`[rave]   presets: ${presets.list().length} loaded from ${PRESETS_PATH}`)
+
+  const audit = new AuditLog(AUDIT_PATH)
   const sink = new NullSink()
   const transform = new IdentityTransform()
 
@@ -34,19 +46,27 @@ async function main(): Promise<void> {
     transform,
     sink,
     universes,
-    onBroadcast: ({ tick, universe }) => {
-      if (tick % 200 === 0) {
-        console.log(`[tick] universe ${universe} tick ${tick}`)
-      }
-    },
   })
   tick.start()
-  console.log(`[rave] ready — 40 Hz tick running on universe(s) ${universes.join(", ")}`)
+  console.log(`[rave]   tick: 40 Hz on universe(s) ${universes.join(", ")}`)
+  console.log(`[rave]   destructive verbs: ${ALLOW_DESTRUCTIVE ? "ENABLED" : "blocked (set RAVE_ALLOW_DESTRUCTIVE=true to enable)"}`)
 
-  // Graceful shutdown
+  const server = await startWsServer({
+    rig,
+    profiles,
+    buffer,
+    presets,
+    layoutPath: LAYOUT_PATH,
+    audit,
+    allowDestructive: ALLOW_DESTRUCTIVE,
+  })
+
+  console.log(`[rave] ready`)
+
   const stop = (signal: string): void => {
     console.log(`\n[rave] received ${signal}, shutting down…`)
     tick.stop()
+    server.stop(true)
     process.exit(0)
   }
   process.on("SIGINT", () => stop("SIGINT"))

@@ -57,7 +57,7 @@ describe("IntentSchema", () => {
 
 describe("VERB_CATALOG", () => {
   test("covers every verb in the schema", () => {
-    const allVerbs = new Set([
+    const expected = [
       "color",
       "gobo",
       "strike",
@@ -74,9 +74,9 @@ describe("VERB_CATALOG", () => {
       "get_state",
       "get_presets",
       "get_rig",
-    ])
-    const catalogVerbs = new Set(VERB_CATALOG.map((v) => v.verb))
-    expect(catalogVerbs).toEqual(allVerbs)
+    ].sort()
+    const catalogVerbs = VERB_CATALOG.map((v) => v.verb).sort()
+    expect(catalogVerbs).toEqual(expected as typeof catalogVerbs)
   })
 
   test("DESTRUCTIVE_VERBS is exactly {strike, strike_all, reset}", () => {
