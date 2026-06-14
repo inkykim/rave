@@ -4,9 +4,11 @@ import {
   ControlSurfaceLayoutSchema,
   VERB_CATALOG,
   WIRE_SCHEMA,
+  expandLayout,
   type ClientMsg,
   type ServerMsg,
   type ControlSurfaceLayout,
+  type DaemonWarnings,
   type ErrorCode,
   type Intent,
   type Profile,
@@ -28,6 +30,27 @@ const ALLOWED_ORIGINS = new Set([
   "http://127.0.0.1:4101",
 ])
 
+/**
+ * Hardcoded minimal layout used when the on-disk layout fails to load. Master
+ * controls only; per-fixture rows are appended by expandLayout regardless.
+ */
+const FALLBACK_LAYOUT: ControlSurfaceLayout = {
+  schema: "rave.layout/v1",
+  pages: [
+    {
+      name: "main",
+      grid: { rows: 1, cols: 5 },
+      pads: [
+        { row: 0, col: 0, label: "Strike all", pressIntent: { verb: "strike_all" } },
+        { row: 0, col: 1, label: "Blackout", pressIntent: { verb: "blackout" } },
+        { row: 0, col: 2, label: "Home", pressIntent: { verb: "home_all" } },
+        { row: 0, col: 3, label: "Reset all", pressIntent: { verb: "reset", fixture: "" } },
+        { row: 0, col: 4, label: "Panic", pressIntent: { verb: "panic" } },
+      ],
+    },
+  ],
+}
+
 export type WsServerOptions = {
   hostname?: string
   port?: number
@@ -44,8 +67,8 @@ export async function startWsServer(opts: WsServerOptions) {
   const hostname = opts.hostname ?? "127.0.0.1"
   const port = opts.port ?? 4101
 
-  // Load the layout JSON once at startup
-  const layout = await loadLayout(opts.layoutPath)
+  const { layout, warnings } = await loadLayoutWithFallback(opts.layoutPath)
+  const effectiveLayout = expandLayout(layout, opts.rig.config, opts.profiles)
 
   const server = Bun.serve<SocketData, never>({
     hostname,
@@ -81,9 +104,11 @@ export async function startWsServer(opts: WsServerOptions) {
           rig: opts.rig.config,
           profiles: opts.profiles,
           layout,
+          effectiveLayout,
           presets: opts.presets.list(),
           buffer: Buffer.from(bytes).toString("base64"),
           tick: opts.buffer.tick,
+          ...(warnings ? { warnings } : {}),
         }
         ws.send(JSON.stringify(hello))
       },
@@ -108,7 +133,7 @@ export async function startWsServer(opts: WsServerOptions) {
 
         const { id, intent } = parsed
         try {
-          await handleIntent(intent, id, ws, opts, layout)
+          await handleIntent(intent, id, ws, opts, layout, effectiveLayout, warnings)
           opts.audit.append({ ts: new Date().toISOString(), clientId: ws.data.clientId, intent, result: "ack" })
         } catch (err) {
           const { code, message } = normalizeError(err)
@@ -120,6 +145,11 @@ export async function startWsServer(opts: WsServerOptions) {
             result: "error",
             errorCode: code,
           })
+          // For rejected preset_* mutations, broadcast the unchanged presets list
+          // with the rejected intent's id so clients can reconcile optimistic state.
+          if (intent.verb === "preset_save" || intent.verb === "preset_recall" || intent.verb === "preset_delete") {
+            broadcast(ws, { type: "presets", presets: opts.presets.list(), causedBy: id })
+          }
         }
       },
       close(ws) {
@@ -130,17 +160,28 @@ export async function startWsServer(opts: WsServerOptions) {
   })
 
   console.log(`[ws] listening on ws://${hostname}:${port}/ws`)
+  if (warnings?.layout_invalid) {
+    console.warn(`[ws] layout fallback active; hello emits warnings.layout_invalid=true`)
+  }
   return server
 }
 
-async function loadLayout(path: string): Promise<ControlSurfaceLayout> {
-  const text = await readFile(path, "utf8")
-  const raw = JSON.parse(text)
-  const parsed = ControlSurfaceLayoutSchema.safeParse(raw)
-  if (!parsed.success) {
-    throw new Error(`[layout] ${path}: ${parsed.error.message}`)
+async function loadLayoutWithFallback(
+  path: string,
+): Promise<{ layout: ControlSurfaceLayout; warnings: DaemonWarnings | null }> {
+  try {
+    const text = await readFile(path, "utf8")
+    const raw = JSON.parse(text)
+    const parsed = ControlSurfaceLayoutSchema.safeParse(raw)
+    if (!parsed.success) {
+      console.warn(`[layout] ${path}: ${parsed.error.message.slice(0, 256)} — using fallback`)
+      return { layout: FALLBACK_LAYOUT, warnings: { layout_invalid: true } }
+    }
+    return { layout: parsed.data, warnings: null }
+  } catch (err) {
+    console.warn(`[layout] ${path}: ${(err as Error).message} — using fallback`)
+    return { layout: FALLBACK_LAYOUT, warnings: { layout_invalid: true } }
   }
-  return parsed.data
 }
 
 async function handleIntent(
@@ -149,6 +190,8 @@ async function handleIntent(
   ws: import("bun").ServerWebSocket<SocketData>,
   opts: WsServerOptions,
   layout: ControlSurfaceLayout,
+  effectiveLayout: ControlSurfaceLayout,
+  warnings: DaemonWarnings | null,
 ): Promise<void> {
   switch (intent.verb) {
     case "preset_save": {
@@ -160,7 +203,6 @@ async function handleIntent(
     case "preset_recall": {
       await opts.presets.recall(intent.name)
       ws.send(JSON.stringify({ type: "ack", id } satisfies ServerMsg))
-      // Buffer was overwritten; broadcast new state
       broadcastState(ws, opts)
       return
     }
@@ -171,18 +213,18 @@ async function handleIntent(
       return
     }
     case "describe": {
-      const universe = opts.rig.config.universe
       const msg: ServerMsg = {
         type: "describe",
         verbs: VERB_CATALOG,
         rig: opts.rig.config,
         profiles: opts.profiles,
         layout,
+        effectiveLayout,
         presets: opts.presets.list(),
+        ...(warnings ? { warnings } : {}),
       }
       ws.send(JSON.stringify(msg))
       ws.send(JSON.stringify({ type: "ack", id } satisfies ServerMsg))
-      void universe
       return
     }
     case "get_state": {
@@ -207,8 +249,13 @@ async function handleIntent(
       ws.send(JSON.stringify(msg))
       return
     }
+    case "get_audit_tail": {
+      const entries = await opts.audit.tail(intent.limit)
+      const msg: ServerMsg = { type: "audit_tail_response", id, entries }
+      ws.send(JSON.stringify(msg))
+      return
+    }
     default: {
-      // Buffer-mutating verb
       dispatchIntent(intent, { rig: opts.rig, buffer: opts.buffer, allowDestructive: opts.allowDestructive })
       ws.send(JSON.stringify({ type: "ack", id } satisfies ServerMsg))
       broadcastState(ws, opts)
@@ -229,7 +276,6 @@ function broadcastState(
     tick: opts.buffer.tick,
   }
   ws.publish("rave:state", JSON.stringify(msg))
-  // Also send to self because publish doesn't echo by default
   ws.send(JSON.stringify(msg))
 }
 
@@ -237,7 +283,7 @@ function broadcast(ws: import("bun").ServerWebSocket<SocketData>, msg: ServerMsg
   const text = JSON.stringify(msg)
   const topic = msg.type === "presets" ? "rave:presets" : "rave:state"
   ws.publish(topic, text)
-  ws.send(text) // echo to caller too
+  ws.send(text)
 }
 
 function sendError(
