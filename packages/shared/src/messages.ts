@@ -6,6 +6,21 @@ import type { ControlSurfaceLayout } from "./layout"
 
 export const WIRE_SCHEMA = "rave.wire/v1" as const
 
+/** Warnings the daemon surfaces on `hello` and `describe` without failing startup. */
+export type DaemonWarnings = {
+  layout_invalid?: boolean
+  rig_degraded?: boolean
+}
+
+/** One entry in the daemon's audit log; returned by get_audit_tail. */
+export type AuditEntrySerialized = {
+  ts: string
+  clientId: string
+  intent: Intent
+  result: "ack" | "error"
+  errorCode?: string
+}
+
 /** Client → Server */
 export type ClientMsg = { type: "intent"; id: string; intent: Intent }
 
@@ -16,10 +31,14 @@ export type ServerMsg =
       schema: typeof WIRE_SCHEMA
       rig: RigConfig
       profiles: Record<string, Profile>
+      /** The raw layout JSON the daemon loaded (may be the fallback if layout_invalid). */
       layout: ControlSurfaceLayout
+      /** Layout with procedurally-generated per-fixture rows appended. */
+      effectiveLayout: ControlSurfaceLayout
       presets: PresetEntry[]
       buffer: string // base64-encoded 512 bytes
       tick: number
+      warnings?: DaemonWarnings
     }
   | { type: "state"; buffer: string; tick: number }
   | { type: "presets"; presets: PresetEntry[]; causedBy: string | null }
@@ -31,11 +50,14 @@ export type ServerMsg =
       rig: RigConfig
       profiles: Record<string, Profile>
       layout: ControlSurfaceLayout
+      effectiveLayout: ControlSurfaceLayout
       presets: PresetEntry[]
+      warnings?: DaemonWarnings
     }
   | { type: "state_response"; id: string; buffer: string; tick: number }
   | { type: "presets_response"; id: string; presets: PresetEntry[] }
   | { type: "rig_response"; id: string; rig: RigConfig; profiles: Record<string, Profile> }
+  | { type: "audit_tail_response"; id: string; entries: AuditEntrySerialized[] }
 
 export const ERROR_CODES = [
   "unknown_fixture",

@@ -74,6 +74,7 @@ describe("VERB_CATALOG", () => {
       "get_state",
       "get_presets",
       "get_rig",
+      "get_audit_tail",
     ].sort()
     const catalogVerbs = VERB_CATALOG.map((v) => v.verb).sort()
     expect(catalogVerbs).toEqual(expected as typeof catalogVerbs)
@@ -81,5 +82,31 @@ describe("VERB_CATALOG", () => {
 
   test("DESTRUCTIVE_VERBS is exactly {strike, strike_all, reset}", () => {
     expect(DESTRUCTIVE_VERBS).toEqual(new Set(["strike", "strike_all", "reset"]))
+  })
+
+  test("requiresAck is true only for preset_* and read verbs", () => {
+    const fireAndForget = VERB_CATALOG.filter((v) => !v.requiresAck).map((v) => v.verb).sort()
+    const ackRequired = VERB_CATALOG.filter((v) => v.requiresAck).map((v) => v.verb).sort()
+    expect(fireAndForget).toEqual(
+      ["color", "gobo", "strike", "strike_all", "blackout", "home", "home_all", "reset", "panic"].sort() as typeof fireAndForget,
+    )
+    expect(ackRequired).toEqual(
+      [
+        "preset_save",
+        "preset_recall",
+        "preset_delete",
+        "describe",
+        "get_state",
+        "get_presets",
+        "get_rig",
+        "get_audit_tail",
+      ].sort() as typeof ackRequired,
+    )
+  })
+
+  test("get_audit_tail accepts optional limit", () => {
+    expect(IntentSchema.safeParse({ verb: "get_audit_tail" }).success).toBe(true)
+    expect(IntentSchema.safeParse({ verb: "get_audit_tail", limit: 50 }).success).toBe(true)
+    expect(IntentSchema.safeParse({ verb: "get_audit_tail", limit: 9999 }).success).toBe(false)
   })
 })
