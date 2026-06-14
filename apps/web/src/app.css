@@ -1,0 +1,94 @@
+:root {
+  --bg: #0a0a0d;
+  --fg: #e8e8ec;
+  --fg-dim: #888a92;
+  --border: #232328;
+  --accent: #ff2e88;
+  --connected: #4ade80;
+  --awaiting: #facc15;
+  --reconnecting: #f59e0b;
+  --dead: #ef4444;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+header .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+}
+
+header .chip.connecting .dot { background: var(--fg-dim); }
+header .chip.awaiting_hello .dot { background: var(--awaiting); }
+header .chip.ready .dot { background: var(--connected); }
+header .chip.reconnecting .dot { background: var(--reconnecting); }
+header .chip.dead .dot { background: var(--dead); }
+
+header .chip .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+header .url {
+  color: var(--fg-dim);
+  font-size: 12px;
+}
+
+main {
+  flex: 1;
+  padding: 1rem;
+}
+
+.hex-dump {
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: pre;
+  background: #15151a;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  color: var(--fg-dim);
+}
+
+.errors {
+  border-top: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  background: #15151a;
+  min-height: 1.6rem;
+}
+
+.errors .err {
+  color: var(--dead);
+  font-size: 12px;
+}
